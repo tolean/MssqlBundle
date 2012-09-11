@@ -22,10 +22,11 @@ make sure your %database_driver% is set to pdo_dblib
 
 *************************
 In app/AppKernel.php registerBundles(), add the following line:
-   $bundles = array(
-            ...
-            new Realestate\MssqlBundle\RealestateMssqlBundle(),
-    ...
+
+    $bundles = array(
+        ...
+        new Realestate\MssqlBundle\RealestateMssqlBundle(),
+        ...
     );
 
 *************************
