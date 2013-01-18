@@ -38,7 +38,6 @@ use Doctrine\DBAL\Platforms\SQLServerPlatform;
  */
 class DblibPlatform extends SQLServerPlatform
 {
-
     /**
      * Whether the platform supports transactions.
      *
@@ -58,7 +57,6 @@ class DblibPlatform extends SQLServerPlatform
     {
         return false;
     }
-    
 
     /**
      * Adds an adapter-specific LIMIT clause to the SELECT statement.
@@ -81,14 +79,14 @@ class DblibPlatform extends SQLServerPlatform
 
             if ($offset == 0) {
                 // SELECT TOP DISTINCT does not work with mssql
-                if(preg_match('#^SELECT\s+DISTINCT#i', $query) > 0) {
+                if (preg_match('#^SELECT\s+DISTINCT#i', $query) > 0) {
                     $query = preg_replace('/^SELECT\s+DISTINCT\s/i', 'SELECT DISTINCT TOP ' . $count . ' ', $query);
                 } else {
                     $query = preg_replace('/^SELECT\s/i', 'SELECT TOP ' . $count . ' ', $query);
                 }
-
-                
             } else {
+                // Remove DISTINCT from query string
+                $query = preg_replace('/\s+DISTINCT/', '', $query);
                 $orderby = stristr($query, 'ORDER BY');
 
                 if (!$orderby) {
@@ -101,20 +99,21 @@ class DblibPlatform extends SQLServerPlatform
                 $query = preg_replace('/\s+ORDER BY(.*)/', '', $query);
 
                 // Add ORDER BY clause as an argument for ROW_NUMBER()
-                //$query = "SELECT ROW_NUMBER() OVER ($over) AS \"doctrine_rownum\", * FROM ($query) AS inner_tbl";
+                // $query = "SELECT ROW_NUMBER() OVER ($over) AS \"doctrine_rownum\", * FROM ($query) AS inner_tbl";
                 $query = preg_replace('/^SELECT\s/', '', $query);
 
                 $start = $offset + 1;
                 $end = $offset + $count;
 
-                //$query = "WITH outer_tbl AS ($query) SELECT * FROM outer_tbl WHERE \"doctrine_rownum\" BETWEEN $start AND $end";
-                $query = "SELECT * FROM (SELECT ROW_NUMBER() OVER ($over) AS \"doctrine_rownum\", $query) AS doctrine_tbl WHERE doctrine_rownum BETWEEN $start AND $end";
+                // $query = "WITH outer_tbl AS ($query) SELECT * FROM outer_tbl WHERE \"doctrine_rownum\""
+                //      . "BETWEEN $start AND $end";
+                $query = "SELECT * FROM (SELECT ROW_NUMBER() OVER ($over) AS \"doctrine_rownum\", $query)"
+                    . "AS doctrine_tbl WHERE doctrine_rownum BETWEEN $start AND $end";
             }
         }
 
         return $query;
     }
-
 
     /**
      * Get the platform name for this instance
@@ -126,8 +125,6 @@ class DblibPlatform extends SQLServerPlatform
         return 'mssql';
     }
 
-
-    /**
     /**
      * @override
      */
@@ -145,5 +142,14 @@ class DblibPlatform extends SQLServerPlatform
     public function getDateTimeFormatString()
     {
         return 'Y-m-d H:i:s.u';
+    }
+
+    /**
+     * @override
+     * @return bool
+     */
+    public function supportsLimitOffset()
+    {
+        return true;
     }
 }
