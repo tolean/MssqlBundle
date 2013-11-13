@@ -90,9 +90,26 @@ class DblibPlatform extends SQLServerPlatform
                 $orderby = stristr($query, 'ORDER BY');
 
                 if (!$orderby) {
-                    $over = 'ORDER BY (SELECT 0)';
+                    $over = $over1 = $over2 = 'ORDER BY (SELECT 0)';
+                    $orderDirection = 'ASC';
+                    $orderDirectionInv = 'DESC';
                 } else {
                     $over = preg_replace('/\"[^,]*\".\"([^,]*)\"/i', '"inner_tbl"."$1"', $orderby);
+                    $orderDirection = stristr($over, 'ASC') ? 'ASC' : 'DESC';
+                    $orderDirectionInv = ($orderDirection == 'ASC') ? 'DESC' : 'ASC';
+                    $over = str_ireplace($orderDirection, '', $over);
+
+                    $orderField = array();
+                    preg_match_all('/\s(\w+\.\w+)\s/', $over, $orderField);
+
+                    $over1 = $over2 = $over;
+                    foreach ($orderField[1] as $index => $field) {
+                        $fieldAlias = 'orderField_' . $index;
+                        $query = preg_replace('/\sFROM/i', ', '. $field . ' AS '. $fieldAlias. ' FROM', $query);
+                        $over1 = str_ireplace($field, $fieldAlias, $over1);
+                        $over2 = str_ireplace($field, $fieldAlias, $over1);
+                    }
+
                 }
 
                 // Remove ORDER BY clause from $query
@@ -107,8 +124,15 @@ class DblibPlatform extends SQLServerPlatform
 
                 // $query = "WITH outer_tbl AS ($query) SELECT * FROM outer_tbl WHERE \"doctrine_rownum\""
                 //      . "BETWEEN $start AND $end";
+                /*
                 $query = "SELECT * FROM (SELECT ROW_NUMBER() OVER ($over) AS \"doctrine_rownum\", $query)"
                     . "AS doctrine_tbl WHERE doctrine_rownum BETWEEN $start AND $end";
+                */
+                $query = "SELECT * FROM (
+                    SELECT TOP {$count} * FROM (
+                        SELECT TOP {$end} {$query} {$over} {$orderDirection}
+                      ) as self1 {$over1} {$orderDirectionInv}
+                    ) as self2 {$over2} {$orderDirection}";
             }
         }
 

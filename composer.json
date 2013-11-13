@@ -1,5 +1,5 @@
 {
-    "name": "isoft/mssql-bundle",
+    "name": "tolean/mssql-bundle",
     "description": "Driver for work with MsSQL server",
     "authors": [
         {
@@ -8,6 +8,10 @@
         {
             "name": "Vitaly Zhloba",
             "email": "vitaly.zhloba@gmail.com"
+        },
+        {
+            "name": "Anatolie Marinescu",
+            "email": "toleanus@mail.ru"
         }
     ],
     "require": {},
