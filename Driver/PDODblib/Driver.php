@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -41,7 +41,7 @@ class Driver implements \Doctrine\DBAL\Driver
                 $driverOptions
             );
         }
-        
+
         return $conn;
     }
 
@@ -68,6 +68,9 @@ class Driver implements \Doctrine\DBAL\Driver
             if (isset($params['dbname'])) {
                 $dsn .= ';Database=' .  $params['dbname'];
             }
+            if (isset($params['charset'])) {
+                $dsn .= 'charset=' . $params['charset'] . ';';
+            }
             return $dsn;
 
         } else {
@@ -81,6 +84,9 @@ class Driver implements \Doctrine\DBAL\Driver
             }
             if (isset($params['dbname'])) {
                 $dsn .= 'dbname=' . $params['dbname'] . ';';
+            }
+            if (isset($params['charset'])) {
+                $dsn .= 'charset=' . $params['charset'] . ';';
             }
 
             return $dsn;
