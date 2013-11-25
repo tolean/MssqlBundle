@@ -1,6 +1,6 @@
 <?php
 /**
- * 
+ *
  *
  * @author      Ken Golovin <ken@webplanet.co.nz>
  */
@@ -36,7 +36,7 @@ class UniqueidentifierType extends Type
 
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
-        if(strlen($value) != 36)
+        if(strlen($value) != 36 && $value !== null)
         {
             // cast the mssql uniqueidentifier to a string
             $value = mssql_guid_string($value);
