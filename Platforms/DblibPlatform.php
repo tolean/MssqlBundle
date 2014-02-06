@@ -161,11 +161,19 @@ class DblibPlatform extends SQLServerPlatform
     }
 
     /**
-     * @override
+     * {@inheritDoc}
      */
     public function getDateTimeFormatString()
     {
-        return 'Y-m-d H:i:s.u';
+        return 'M j Y H:i:s:uA';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getDateFormatString()
+    {
+        return $this->getDateTimeFormatString();
     }
 
     /**
